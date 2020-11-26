@@ -18,11 +18,11 @@ python server.py
 And as many clients as you want:
 python client.py
 
-The variable min_updated_clients defines how many clients needs to be updated before the server model is update
+The variable *min_updated_clients* in server.py defines how many clients needs to be updated before the server model is update
 
 If min_updated_clients is set to 1 and only one client is executed the code reproduces a local (not-federated) learning of the model
 
-In client.py the variable X is the matrix of input features with samples along the row, and Y is the array of output
+In client.py the variable *X* is the matrix of input features with samples along the row, and *Y* is the array of output
 
 
 
