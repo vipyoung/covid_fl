@@ -12,3 +12,17 @@ The *sklearn* library is used for the ML model
 
 * client.py: client code. When requested by the server it performs a step of minimization of the loss function, and it sends back the updated model
 
+For testing the code run the server:
+python server.py
+
+And as many clients as you want:
+python client.py
+
+The variable min_updated_clients defines how many clients needs to be updated before the server model is update
+
+If min_updated_clients is set to 1 and only one client is executed the code reproduces a local (not-federated) learning of the model
+
+In client.py the variable X is the matrix of input features with samples along the row, and Y is the array of output
+
+
+
