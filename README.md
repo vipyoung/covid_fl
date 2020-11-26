@@ -8,9 +8,7 @@ The libraries *socket* and *threading* are used to manage communications between
 
 The *sklearn* library is used for the ML model
 
-* server.py: server code
-It creates the sockets for communicating with the clients and it manages the federated learning of the model
+* server.py: server code. It creates the sockets for communicating with the clients and it manages the federated learning of the model
 
-* client.py: client code
-When requested by the server it performs a step of minimization of the loss function, and it sends back the updated model
+* client.py: client code. When requested by the server it performs a step of minimization of the loss function, and it sends back the updated model
 
