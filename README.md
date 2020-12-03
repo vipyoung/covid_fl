@@ -25,7 +25,7 @@ For testing the code locally:
 
 The variable *min_updated_clients* in server.py defines how many clients needs to be updated before the server model is updated
 
-If min_updated_clients is set to 1 and only one client is executed and the code reproduces a local (not-federated) learning of the model
+If *min_updated_clients* is set to 1 and only one client is executed and the code reproduces a local (not-federated) learning of the model
 
 In client.py the variable *X* is the matrix of input features with samples along the row, and *y* is the array of output classes
 
