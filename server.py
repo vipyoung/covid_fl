@@ -159,10 +159,10 @@ def update_server_model():
             client_samples[client_name] = 0
         i_iter += 1
 
-#--- initialization
-reg_strengths = np.logspace(np.log10(1e-4), np.log10(1e2), 5) # array with the tested values for regularization strengths
-k_folds = 2 # number of folds for cross-validation
-max_iter = 100 # maximum number of minimization steps
+#----- INITIALIZATION
+reg_strengths = np.logspace(np.log10(1e-2), np.log10(1e3), 10) # array with the tested values for regularization strengths
+k_folds = 4 # number of folds for cross-validation
+max_iter = 10 # maximum number of minimization steps
 i_reg = 0 # index in the array of regularization strenths
 i_fold = 0 # index of the fold for K-folds cross-validation
 i_iter = 0 # index of the minimization step
@@ -174,10 +174,9 @@ client_models = {} # ... the model in the last client update
 acc_means = np.empty(len(reg_strengths)) # average accuracy over k-folds at different regularization strengths
 acc_stds = np.empty(len(reg_strengths)) # standard deviation of the accuracy over k-folds at different regularization strengths
 server_model = LogisticRegression(penalty = 'l1', C = reg_strengths[i_reg], solver='saga', max_iter=1, warm_start=True)
-#--- initialization
-
 server_ip = 'localhost'
 server_port = 10000
+#----- END: INITIALIZATION
 
 soc = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
 soc.bind((server_ip, server_port))

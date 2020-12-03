@@ -2,6 +2,7 @@ import socket
 import time
 import pickle
 import numpy as np
+import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 from sklearn.datasets import load_breast_cancer
@@ -32,14 +33,22 @@ def recv(soc, buffer_size=1048576, recv_timeout=10):
 server_ip = 'localhost'
 server_port = 10000
 
-#### dummy dataset
-dataset = load_breast_cancer()
-X = dataset['data']
-# X is a matrix with dimensions: n_samples(rows) * n_features(columns)
-y = dataset['target']
-# y is an array with dimension n_samples with boolean values: 1 (severe covid) and 0 (asymptomatic)
-X, y = shuffle(X, y, random_state=np.random.randint(100))
-####
+#----- INITIALIZATION
+bim = pd.read_csv('./MergeM1.bim', header = None, sep = '\t')
+ped = pd.read_csv('./MergeM1.ped', header = None, index_col = 0, sep = '\t')
+ped.drop(ped.columns[range(5)], axis = 1, inplace = True)
+ref_ref = (bim[5] + ' ' + bim[5]).values.reshape((1,-1)) 
+features_local = pd.DataFrame((ped.values != ref_ref).astype(int), columns = bim[1], index = ped.index) # this dataframe has samples along the rows and genes along the columns, features_local[i,j] is 1 if gene j in sample i is mutated
+with open('genes_list.txt','rt') as fin:
+    genes_list = [l.strip() for l in fin.readlines() if l.strip()]
+features = pd.DataFrame(np.zeros((len(ped.index), len(genes_list))).astype(int), index = ped.index, columns = genes_list)
+for gene in features_local.columns:
+    features[gene] = features_local[gene]
+pheno = pd.read_csv('./pheno.txt', sep = '\t', index_col = 0)
+phenotypes = pheno.loc[features.index]['A1'] # where A1 is the name of the column of the pheno.txt considered for the analysis
+X = features.values # np.array of input features
+y = phenotypes.values # np.array of output classes
+#----- END: INITIALIZATION
 
 soc = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
 print('Socket Created\n')
@@ -121,7 +130,3 @@ model_standard.fit(X, y)
 make_plot(model)
 make_plot(model_standard)
 """
-
-
-
-
