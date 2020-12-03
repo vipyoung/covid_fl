@@ -17,11 +17,11 @@ The *sklearn* library is used for the ML model
 
 For testing the code locally:
 
-* 1) run prepare_inputs.sh to create the necessary input files
+* run prepare_inputs.sh to create the necessary input files
 
-* 2) run the server with: python server.py
+* run the server with: python server.py
 
-* 3) run as many clients as you want with: python client.py
+* run as many clients as you want with: python client.py
 
 The variable *min_updated_clients* in server.py defines how many clients needs to be updated before the server model is updated
 
