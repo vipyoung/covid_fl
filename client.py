@@ -38,78 +38,84 @@ def recv(soc, buffer_size = 4096, recv_timeout = 10):
 server_ip = 'localhost'
 server_port = 10000
 
+# execution mode: real (default) or dummy
+mode = 'real'
+if len(sys.argv) > 1:
+    if sys.argv[1] == 'dummy':
+        mode = 'dummy'
+
+
 #----- INITIALIZATION
-
-bim = pd.read_csv('./MergeM2.bim', header = None, sep = '\t')
-ped = pd.read_csv('./MergeM2.ped', header = None, index_col = 0, sep = '\t')
-ped.drop(ped.columns[range(5)], axis = 1, inplace = True)
-ref_ref = (bim[5] + ' ' + bim[5]).values.reshape((1,-1)) 
-feature_genes = pd.DataFrame((ped.values != ref_ref).astype(int), columns = bim[1], index = ped.index) # this dataframe has samples along the rows and genes along the columns, features_local[i,j] is 1 if gene j in sample i is mutated
-pheno = pd.read_csv('./pheno.txt', sep = ' ', index_col = 0)
-covar = pd.read_csv('./covar.txt', sep = ' ', index_col = 0)
-index_samples = set(feature_genes.index) & set(pheno.index) & set(covar.index)
-phenotypes = pheno.loc[index_samples]['A2'] # where A2 is the name of the column of the pheno.txt considered for the analysis
-age_max = 100
-covar = covar.loc[index_samples][['age', 'sex']]
-covar['age'][covar['age'] > age_max] = age_max
-covar['age'] = covar['age'] / age_max
-covar['age*sex'] = covar['age']*covar['sex']
-covar['age^2'] = covar['age']**2
-covar['age^2*sex'] = covar['age']**2*covar['sex']
-X = np.concatenate((covar.values, feature_genes.loc[index_samples].values), axis = 1) # np.array of input features
-y = phenotypes.values # np.array of output classes
-feature_names = np.array(['age','sex','age*sex','age^2','age^2*sex'] + list(feature_genes.columns))
-print('Number of samples: {}'.format(X.shape[0]))
-print('Number of features: {}'.format(X.shape[1]), len(feature_names))
-print('Samples per phenotype class: {}'.format(', '.join(['{} = {}'.format(class_id, n_samples) for class_id, n_samples in zip(*np.unique(y, return_counts = True))])))
-
-#--- dummy
-#from sklearn.preprocessing import PolynomialFeatures
-#n_samples = 1000
-#n_samples_half = int(0.5*n_samples)
-#x0 = np.random.randint(low = 0, high = 2, size = n_samples)
-#x1 = np.random.randint(low = 0, high = 2, size = n_samples)
-#x2 = np.random.randint(low = 0, high = 2, size = n_samples)
-#x3 = np.random.randint(low = 0, high = 2, size = n_samples)
-#noise_term = (np.abs(np.random.normal(loc = 0.0, scale = 1, size = n_samples) ) > 2.0)
-#pred_01 = (np.logical_xor(x0,x1).astype(int) + noise_term) % 2
-#pred_23 = (np.logical_xor(x2,x3).astype(int) + noise_term) % 2
-#y = np.empty(n_samples)
-#if len(sys.argv) == 1: # combination of two rules
-#    print('# Combination of two rules')
-#    y[:n_samples_half] = pred_01[:n_samples_half]
-#    y[n_samples_half:] = pred_23[n_samples_half:]
-#    X = np.concatenate((x0.reshape(-1,1),x1.reshape(-1,1),x2.reshape(-1,1),x3.reshape(-1,1)), axis = 1)
-#    poly = PolynomialFeatures(3, include_bias = False)
-#    X = poly.fit_transform(X)
-#    for i_noise in range(1000):
-#        noise_term =  np.random.randint(low = 0, high = 2, size = (n_samples,1))
-#        X = np.concatenate((X, noise_term), axis = 1)
-#    feature_names = ['A'+str(i) for i in range(X.shape[1])]
-#elif len(sys.argv) == 2: # using alternatively one or the other rule
-#    if int(sys.argv[1]) % 2  == 0:
-#        print('# Using rule 0')
-#        y = pred_01
-#        X = np.concatenate((x0.reshape(-1,1),x1.reshape(-1,1),x2.reshape(-1,1),x3.reshape(-1,1)), axis = 1)
-#        poly = PolynomialFeatures(3, include_bias = False)
-#        X = poly.fit_transform(X)
-#        for i_noise in range(1000):
-#            noise_term =  np.random.randint(low = 0, high = 2, size = (n_samples,1))
-#            X = np.concatenate((X, noise_term), axis = 1)
-#        feature_names = ['A'+str(i) for i in range(50)] +  ['B'+str(i) for i in range(50, X.shape[1])]
-#    else:
-#        print('# Using rule 1')
-#        y = pred_23
-#        X = np.concatenate((x0.reshape(-1,1),x1.reshape(-1,1),x2.reshape(-1,1),x3.reshape(-1,1)), axis = 1)
-#        poly = PolynomialFeatures(3, include_bias = False)
-#        X = poly.fit_transform(X)
-#        for i_noise in range(750):
-#            noise_term =  np.random.randint(low = 0, high = 2, size = (n_samples,1))
-#            X = np.concatenate((X, noise_term), axis = 1)
-#        feature_names = ['A'+str(i) for i in range(50)] +  ['C'+str(i) for i in range(50, X.shape[1])]
-#X, y = shuffle(X, y)
-#--- END: dummy
-
+if mode == 'real':
+    bim = pd.read_csv('./MergeM2.bim', header = None, sep = '\t')
+    ped = pd.read_csv('./MergeM2.ped', header = None, index_col = 0, sep = '\t')
+    ped.drop(ped.columns[range(5)], axis = 1, inplace = True)
+    ref_ref = (bim[5] + ' ' + bim[5]).values.reshape((1,-1)) 
+    feature_genes = pd.DataFrame((ped.values != ref_ref).astype(int), columns = bim[1], index = ped.index) # this dataframe has samples along the rows and genes along the columns, features_local[i,j] is 1 if gene j in sample i is mutated
+    pheno = pd.read_csv('./pheno.txt', sep = ' ', index_col = 0)
+    covar = pd.read_csv('./covar.txt', sep = ' ', index_col = 0)
+    index_samples = set(feature_genes.index) & set(pheno.index) & set(covar.index)
+    phenotypes = pheno.loc[index_samples]['A2'] # where A2 is the name of the column of the pheno.txt considered for the analysis
+    age_max = 100
+    covar = covar.loc[index_samples][['age', 'sex']]
+    covar['age'][covar['age'] > age_max] = age_max
+    covar['age'] = covar['age'] / age_max
+    covar['age*sex'] = covar['age']*covar['sex']
+    covar['age^2'] = covar['age']**2
+    covar['age^2*sex'] = covar['age']**2*covar['sex']
+    X = np.concatenate((covar.values, feature_genes.loc[index_samples].values), axis = 1) # np.array of input features
+    y = phenotypes.values # np.array of output classes
+    feature_names = np.array(['age','sex','age*sex','age^2','age^2*sex'] + list(feature_genes.columns))
+    print('Number of samples: {}'.format(X.shape[0]))
+    print('Number of features: {}'.format(X.shape[1]), len(feature_names))
+    print('Samples per phenotype class: {}'.format(', '.join(['{} = {}'.format(class_id, n_samples) for class_id, n_samples in zip(*np.unique(y, return_counts = True))])))
+else:
+    #--- dummy
+    from sklearn.preprocessing import PolynomialFeatures
+    n_samples = 1000
+    n_samples_half = int(0.5*n_samples)
+    x0 = np.random.randint(low = 0, high = 2, size = n_samples)
+    x1 = np.random.randint(low = 0, high = 2, size = n_samples)
+    x2 = np.random.randint(low = 0, high = 2, size = n_samples)
+    x3 = np.random.randint(low = 0, high = 2, size = n_samples)
+    noise_term = (np.abs(np.random.normal(loc = 0.0, scale = 1, size = n_samples) ) > 2.0)
+    pred_01 = (np.logical_xor(x0,x1).astype(int) + noise_term) % 2
+    pred_23 = (np.logical_xor(x2,x3).astype(int) + noise_term) % 2
+    y = np.empty(n_samples)
+    if len(sys.argv) == 2: # combination of two rules
+        print('# Combination of two rules')
+        y[:n_samples_half] = pred_01[:n_samples_half]
+        y[n_samples_half:] = pred_23[n_samples_half:]
+        X = np.concatenate((x0.reshape(-1,1),x1.reshape(-1,1),x2.reshape(-1,1),x3.reshape(-1,1)), axis = 1)
+        poly = PolynomialFeatures(3, include_bias = False)
+        X = poly.fit_transform(X)
+        for i_noise in range(1000):
+            noise_term =  np.random.randint(low = 0, high = 2, size = (n_samples,1))
+            X = np.concatenate((X, noise_term), axis = 1)
+        feature_names = ['A'+str(i) for i in range(X.shape[1])]
+    elif len(sys.argv) == 3: # using alternatively one or the other rule
+        if int(sys.argv[2]) % 2  == 0:
+            print('# Using rule 0')
+            y = pred_01
+            X = np.concatenate((x0.reshape(-1,1),x1.reshape(-1,1),x2.reshape(-1,1),x3.reshape(-1,1)), axis = 1)
+            poly = PolynomialFeatures(3, include_bias = False)
+            X = poly.fit_transform(X)
+            for i_noise in range(1000):
+                noise_term =  np.random.randint(low = 0, high = 2, size = (n_samples,1))
+                X = np.concatenate((X, noise_term), axis = 1)
+            feature_names = ['A'+str(i) for i in range(50)] +  ['B'+str(i) for i in range(50, X.shape[1])]
+        else:
+            print('# Using rule 1')
+            y = pred_23
+            X = np.concatenate((x0.reshape(-1,1),x1.reshape(-1,1),x2.reshape(-1,1),x3.reshape(-1,1)), axis = 1)
+            poly = PolynomialFeatures(3, include_bias = False)
+            X = poly.fit_transform(X)
+            for i_noise in range(750):
+                noise_term =  np.random.randint(low = 0, high = 2, size = (n_samples,1))
+                X = np.concatenate((X, noise_term), axis = 1)
+            feature_names = ['A'+str(i) for i in range(50)] +  ['C'+str(i) for i in range(50, X.shape[1])]
+    X, y = shuffle(X, y)
+    #--- END: dummy
 #----- END: INITIALIZATION
 
 soc = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)

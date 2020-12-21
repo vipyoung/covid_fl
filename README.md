@@ -7,15 +7,23 @@ https://docs.google.com/document/d/1SETsJs77z-32fHzovNEPhMOapK959w-u8PVynYCh8Fg/
 The libraries *socket* and *threading* are used to manage communications between the server and the client
 
 The *sklearn* library is used for the ML model
-
-
+## Files in this folder:
 * server.py: server code. It creates the sockets for communicating with the clients and it manages the federated learning process
 
 * prepare_inputs.sh: It creates input files for the client
 
 * client.py: client code. When requested by the server it performs a step of minimization of the loss function, and it sends back the updated model
 
-For testing the code locally:
+## To get started:
+- create a python virtual environment: python3 -m venv fl_venv
+- Start your virtualenv: . fl_venv/bin/activate
+- install dependencies: pip -r requirements.txt
+- run server: `python server.py`
+- open new terminal, and start virtualenv: . fl_venv/bin/activate
+- run client: `python client.py dummy` -- remove dummy to use real data.
+
+
+## For testing the code locally:
 
 * run prepare_inputs.sh to create the necessary input files
 
